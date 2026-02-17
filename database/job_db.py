@@ -1,0 +1,102 @@
+import sqlite3
+from datetime import datetime
+
+class JobDatabase:
+    def __init__(self, db_path="jobs.db"):
+        self.db_path = db_path
+        self.init_db()
+    
+    def init_db(self):
+        """Create tables if they don't exist"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS jobs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                job_id TEXT UNIQUE,
+                title TEXT,
+                company TEXT,
+                location TEXT,
+                url TEXT,
+                description TEXT,
+                posted_date TEXT,
+                scraped_date TEXT,
+                source TEXT
+            )
+        ''')
+        
+        conn.commit()
+        conn.close()
+    
+    def job_exists(self, job_id):
+        """Check if job already exists in database"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT COUNT(*) FROM jobs WHERE job_id = ?', (job_id,))
+        exists = cursor.fetchone()[0] > 0
+        
+        conn.close()
+        return exists
+    
+    def add_job(self, job_data):
+        """Add new job to database"""
+        try:
+            if self.job_exists(job_data['job_id']):
+                return False  # Already exists
+            
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                INSERT INTO jobs (job_id, title, company, location, url, description, posted_date, scraped_date, source)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                job_data['job_id'],
+                job_data['title'],
+                job_data['company'],
+                job_data['location'],
+                job_data['url'],
+                job_data.get('description', ''),
+                job_data.get('posted_date', ''),
+                datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                job_data['source']
+            ))
+            
+            conn.commit()
+            conn.close()
+            return True
+            
+        except Exception as e:
+            print(f"      ❌ Database error: {e}")
+            return False
+    
+    def get_todays_jobs(self):
+        """Get all jobs scraped today"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        today = datetime.now().strftime('%Y-%m-%d')
+        cursor.execute('SELECT * FROM jobs WHERE scraped_date LIKE ?', (f'{today}%',))
+        jobs = cursor.fetchall()
+        
+        conn.close()
+        return jobs
+    
+    def cleanup_old_jobs(self, days_old=7):
+        """Delete jobs older than specified days"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        from datetime import timedelta
+        
+        cutoff = (datetime.now() - timedelta(days=days_old)).strftime('%Y-%m-%d')
+        
+        cursor.execute('DELETE FROM jobs WHERE scraped_date < ?', (cutoff,))
+        deleted = cursor.rowcount
+        
+        conn.commit()
+        conn.close()
+        
+        return deleted
