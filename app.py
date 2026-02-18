@@ -1,12 +1,14 @@
 from flask import Flask, render_template, request, jsonify
 from database.job_db import JobDatabase
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
+import subprocess
+import threading
 
 app = Flask(__name__)
 
 def get_category(title):
-    """Determine job category from title"""
+    """Determine job category"""
     title_lower = title.lower()
     
     pm_keywords = ['product', 'program', 'project', 'management', 'manager', 'strategy', 'operations']
@@ -23,7 +25,7 @@ def get_category(title):
         return 'pm'
 
 def get_category_label(title):
-    """Get category display label"""
+    """Get category label"""
     category = get_category(title)
     labels = {
         'pm': '📦 PM/Product',
@@ -32,25 +34,46 @@ def get_category_label(title):
     }
     return labels.get(category, '📦 PM/Product')
 
+def is_last_hour(scraped_date):
+    """Check if job was scraped in last hour"""
+    try:
+        job_time = datetime.strptime(scraped_date, '%Y-%m-%d %H:%M:%S')
+        one_hour_ago = datetime.now() - timedelta(hours=1)
+        return job_time >= one_hour_ago
+    except:
+        return False
+
 app.jinja_env.globals.update(get_category=get_category)
 app.jinja_env.globals.update(get_category_label=get_category_label)
+app.jinja_env.globals.update(is_last_hour=is_last_hour)
 
 @app.route('/')
 def index():
-    """Homepage - Show all jobs"""
+    """Homepage"""
     try:
         db = JobDatabase()
-        jobs = db.get_todays_jobs()
+        
+        # Clean up old unapplied jobs first
+        deleted = db.cleanup_old_unapplied_jobs()
+        if deleted > 0:
+            print(f"🗑️  Cleaned up {deleted} old unapplied jobs")
+        
+        # Get all jobs from last 24 hours
+        all_jobs = db.get_todays_jobs()
+        last_hour = db.get_last_hour_jobs()
+        applied = db.get_applied_jobs()
         
         return render_template('index.html', 
-                             jobs=jobs, 
-                             total=len(jobs))
+                             jobs=all_jobs,
+                             total=len(all_jobs),
+                             last_hour_count=len(last_hour),
+                             applied_count=len(applied))
     except Exception as e:
         return f"""
         <div style='padding: 40px; text-align: center; font-family: Arial;'>
             <h1>⚠️ Dashboard Error</h1>
             <p style='color: #666; margin: 20px 0;'>{str(e)}</p>
-            <p>Make sure you've run <code>python main.py</code> first to populate the database!</p>
+            <p>Run <code>python main.py</code> first!</p>
             <br>
             <a href='/' style='padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px;'>
                 Retry
@@ -60,10 +83,13 @@ def index():
 
 @app.route('/api/jobs')
 def get_jobs_api():
-    """API endpoint - Get jobs as JSON"""
+    """Get jobs as JSON"""
     try:
         db = JobDatabase()
         jobs = db.get_todays_jobs()
+        last_hour_jobs = db.get_last_hour_jobs()
+        
+        last_hour_ids = {job[1] for job in last_hour_jobs}
         
         jobs_list = []
         for job in jobs:
@@ -76,7 +102,9 @@ def get_jobs_api():
                 'url': job[5],
                 'scraped_date': job[8],
                 'source': job[9],
-                'category': get_category(job[2])
+                'applied': job[10] if len(job) > 10 else 0,
+                'category': get_category(job[2]),
+                'is_last_hour': job[1] in last_hour_ids
             })
         
         return jsonify({
@@ -86,57 +114,33 @@ def get_jobs_api():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/copy-job', methods=['POST'])
-def copy_job_details():
-    """Format job for Claude chat"""
-    data = request.json
-    
-    formatted = f"""Hey Claude! Help me tailor my resume for this job:
-
-Job Title: {data.get('title')}
-Company: {data.get('company')}
-Location: {data.get('location')}
-Job URL: {data.get('url')}
-
-Please:
-1. Tailor my resume to emphasize relevant experience
-2. Generate a compelling cover letter
-3. Suggest which projects to highlight
-
-I'll paste my resume and job description below.
-"""
-    
-    return jsonify({'formatted_text': formatted, 'success': True})
-
 @app.route('/mark-applied', methods=['POST'])
 def mark_applied():
-    """Mark job as applied"""
+    """Mark job as applied in database"""
     data = request.json
     job_id = data.get('job_id')
     
-    return jsonify({
-        'success': True, 
-        'message': f'Marked job {job_id} as applied!',
-        'job_id': job_id
-    })
+    try:
+        db = JobDatabase()
+        db.mark_as_applied(job_id)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Marked as applied!',
+            'job_id': job_id
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/run-scraper', methods=['POST'])
 def run_scraper():
-    """Trigger main.py scraper from dashboard"""
-    import subprocess
-    import threading
-    
+    """Trigger scraper"""
     def run_in_background():
         try:
-            result = subprocess.run(
-                ['python', 'main.py'], 
-                capture_output=True, 
-                text=True,
-                timeout=180
-            )
+            subprocess.run(['python', 'main.py'], capture_output=True, timeout=180)
             print("✅ Scraper completed")
         except Exception as e:
-            print(f"❌ Scraper error: {e}")
+            print(f"❌ Error: {e}")
     
     thread = threading.Thread(target=run_in_background)
     thread.daemon = True
@@ -144,42 +148,41 @@ def run_scraper():
     
     return jsonify({
         'success': True,
-        'message': 'Job scraper started! New jobs will appear in ~2 minutes.'
+        'message': 'Scraper started! Refresh in 2 minutes.'
     })
-
-@app.route('/stats')
-def get_stats():
-    """Get application statistics"""
+@app.route('/get-description', methods=['POST'])
+def get_description():
+    """Fetch job description from URL"""
+    from scrapers.job_description_fetcher import JobDescriptionFetcher
+    
+    data = request.json
+    url = data.get('url')
+    
     try:
-        db = JobDatabase()
-        jobs = db.get_todays_jobs()
+        fetcher = JobDescriptionFetcher()
+        description = fetcher.fetch_linkedin_description(url)
         
-        stats = {
-            'total': len(jobs),
-            'pm': len([j for j in jobs if get_category(j[2]) == 'pm']),
-            'data': len([j for j in jobs if get_category(j[2]) == 'data']),
-            'design': len([j for j in jobs if get_category(j[2]) == 'design'])
-        }
-        
-        return jsonify(stats)
+        return jsonify({
+            'success': True,
+            'description': description
+        })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 if __name__ == '__main__':
     print("\n" + "="*60)
-    print("🚀 Job Application Dashboard Starting...")
+    print("🚀 Job Application Dashboard")
     print("="*60)
-    print("\n📍 Open your browser to: http://localhost:5001")
-    print("🎯 Features:")
-    print("   ✅ Filter by category (PM/Data/Design)")
-    print("   ✅ Search jobs")
-    print("   ✅ Sort by date/company/title")
-    print("   ✅ Dark mode")
-    print("   ✅ Track applied jobs")
-    print("   ✅ Copy for Claude (free AI tailoring)")
-    print("   ✅ Auto-refresh every 5 minutes")
-    print("   ✅ Run scraper from dashboard")
-    print("\n💡 Make sure 'jobs.db' exists (run main.py first)")
+    print("\n📍 Open: http://localhost:5001")
+    print("\n✨ Features:")
+    print("   🔥 Last hour jobs highlighted")
+    print("   📊 24-hour job feed")
+    print("   ✅ Applied job tracking")
+    print("   🗑️  Auto-cleanup old unapplied jobs")
+    print("   🔄 Auto-refresh every 5 min")
     print("\nPress Ctrl+C to stop\n")
     
     app.run(debug=True, port=5001, host='0.0.0.0')

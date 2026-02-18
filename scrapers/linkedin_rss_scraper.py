@@ -6,16 +6,17 @@ class LinkedInRSSScraper:
     def __init__(self):
         self.base_url = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
     
-    def search_jobs(self, keyword, location="United States", max_results=50):
-        """Search LinkedIn - Accept ALL jobs in PM/Data/Design categories"""
+    def search_jobs(self, keyword, location="United States", max_results=50, time_window=86400):
+        """Search LinkedIn
+        time_window: seconds (3600 = 1 hour, 86400 = 24 hours)
+        """
         jobs = []
         
         try:
             print(f"    Searching LinkedIn (24hrs): {keyword}...")
             
             # Last 24 hours
-            params = f"?keywords={keyword.replace(' ', '%20')}&location={location}&f_JT=I&f_TPR=r86400"
-            
+            params = f"?keywords={keyword.replace(' ', '%20')}&location={location}&f_JT=I&f_TPR=r{time_window}"
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
             }

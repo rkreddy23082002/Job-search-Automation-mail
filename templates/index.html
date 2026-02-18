@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎯 Job Application Dashboard</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root {
             --primary: #667eea;
@@ -18,7 +14,7 @@
             --data-color: #9C27B0;
             --design-color: #E91E63;
             --success: #4CAF50;
-            --warning: #FF9800;
+            --fire: #FF4500;
             --background: #f5f7fa;
             --card-bg: #ffffff;
             --text-primary: #2c3e50;
@@ -29,13 +25,12 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--background);
             color: var(--text-primary);
             line-height: 1.6;
         }
         
-        /* Dark Mode */
         body.dark-mode {
             --background: #1a1a2e;
             --card-bg: #16213e;
@@ -44,13 +39,8 @@
             --border: #2a2a3e;
         }
         
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
         
-        /* Header */
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -67,32 +57,16 @@
             margin-bottom: 15px;
         }
         
-        .header h1 {
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
+        .header h1 { font-size: 36px; font-weight: 700; margin-bottom: 10px; }
+        .header p { font-size: 16px; opacity: 0.9; }
+        .header-status { font-size: 13px; opacity: 0.85; margin-top: 8px; }
         
-        .header p {
-            font-size: 16px;
-            opacity: 0.9;
-        }
-        
-        .header-status {
-            font-size: 13px;
-            opacity: 0.85;
-            margin-top: 8px;
-        }
-        
-        .header-buttons {
-            display: flex;
-            gap: 10px;
-        }
+        .header-buttons { display: flex; gap: 10px; }
         
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
             margin-top: 25px;
         }
         
@@ -111,31 +85,31 @@
         }
         
         .stat-label {
-            font-size: 13px;
+            font-size: 12px;
             opacity: 0.9;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
-        /* Controls */
         .controls {
             background: var(--card-bg);
             padding: 20px;
             border-radius: 15px;
             margin-bottom: 20px;
             box-shadow: var(--shadow);
+        }
+        
+        .control-row {
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
             align-items: center;
-            justify-content: space-between;
+            margin-bottom: 15px;
         }
         
-        .filters {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
+        .control-row:last-child { margin-bottom: 0; }
+        
+        .filters { display: flex; gap: 10px; flex-wrap: wrap; }
         
         .filter-btn {
             padding: 10px 20px;
@@ -155,15 +129,9 @@
             transform: translateY(-2px);
         }
         
-        .filter-btn.active {
-            background: var(--primary);
-            color: white;
-        }
+        .filter-btn.active { background: var(--primary); color: white; }
         
-        .search-box {
-            flex: 1;
-            min-width: 250px;
-        }
+        .search-box { flex: 1; min-width: 250px; }
         
         .search-box input {
             width: 100%;
@@ -171,15 +139,11 @@
             border: 2px solid var(--border);
             border-radius: 8px;
             font-size: 14px;
-            transition: border 0.2s;
             background: var(--card-bg);
             color: var(--text-primary);
         }
         
-        .search-box input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
+        .search-box input:focus { outline: none; border-color: var(--primary); }
         
         .icon-btn {
             padding: 10px 20px;
@@ -187,23 +151,13 @@
             border: 2px solid var(--border);
             border-radius: 8px;
             cursor: pointer;
-            font-size: 20px;
+            font-size: 18px;
             transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
         }
         
-        .icon-btn:hover {
-            transform: scale(1.05);
-            border-color: var(--primary);
-        }
+        .icon-btn:hover { transform: scale(1.05); border-color: var(--primary); }
         
-        /* Job Cards */
-        .jobs-grid {
-            display: grid;
-            gap: 15px;
-        }
+        .jobs-grid { display: grid; gap: 15px; }
         
         .job-card {
             background: var(--card-bg);
@@ -212,6 +166,7 @@
             box-shadow: var(--shadow);
             transition: all 0.3s;
             border-left: 4px solid transparent;
+            position: relative;
         }
         
         .job-card:hover {
@@ -223,11 +178,31 @@
         .job-card.data { border-left-color: var(--data-color); }
         .job-card.design { border-left-color: var(--design-color); }
         
-        .job-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 15px;
+        .job-card.last-hour {
+            background: linear-gradient(to right, #fff9e6 0%, var(--card-bg) 100%);
+            border: 2px solid #ffeb3b;
+        }
+        
+        body.dark-mode .job-card.last-hour {
+            background: linear-gradient(to right, #2a2416 0%, var(--card-bg) 100%);
+        }
+        
+        .new-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #FF4500;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         
         .job-title {
@@ -236,15 +211,13 @@
             color: var(--text-primary);
             margin-bottom: 8px;
             line-height: 1.3;
+            padding-right: 100px;
         }
         
         .job-company {
             font-size: 16px;
             color: var(--text-secondary);
             margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
         
         .job-meta {
@@ -265,26 +238,9 @@
             font-weight: 600;
         }
         
-        .cat-pm {
-            background: #e3f2fd;
-            color: #1976d2;
-        }
-        
-        .cat-data {
-            background: #f3e5f5;
-            color: #7b1fa2;
-        }
-        
-        .cat-design {
-            background: #fce4ec;
-            color: #c2185b;
-        }
-        
-        .timestamp {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+        .cat-pm { background: #e3f2fd; color: #1976d2; }
+        .cat-data { background: #f3e5f5; color: #7b1fa2; }
+        .cat-design { background: #fce4ec; color: #c2185b; }
         
         .actions {
             display: flex;
@@ -301,53 +257,15 @@
             font-weight: 600;
             font-size: 14px;
             transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
         }
         
-        .btn:hover {
-            transform: translateY(-2px);
-        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: white; border: 2px solid var(--primary); color: var(--primary); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:disabled { opacity: 0.6; cursor: not-allowed; }
         
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: var(--primary-dark);
-        }
-        
-        .btn-secondary {
-            background: white;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-        }
-        
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-        
-        .btn-success:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-secondary);
-        }
-        
-        .empty-state h2 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        
-        /* Toast Notifications */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -358,82 +276,140 @@
             border-radius: 8px;
             box-shadow: var(--shadow-hover);
             display: none;
-            animation: slideIn 0.3s ease;
             z-index: 1000;
             font-weight: 600;
         }
         
-        .toast.show {
-            display: block;
-        }
+        .toast.show { display: block; animation: slideIn 0.3s ease; }
         
         @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
         
-        /* Responsive */
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+        
+        /* Modal for Job Description */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 32px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-header {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .modal-meta {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .description-text {
+            background: var(--background);
+            padding: 25px;
+            border-radius: 10px;
+            white-space: pre-wrap;
+            line-height: 1.8;
+            font-size: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+            margin-bottom: 25px;
+            color: var(--text-primary);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .copy-description-btn {
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .copy-description-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
         @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .header {
-                padding: 25px;
-            }
-            
-            .header h1 {
-                font-size: 24px;
-            }
-            
-            .stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .job-card {
-                padding: 20px;
-            }
-            
-            .actions {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
+            .container { padding: 10px; }
+            .header { padding: 25px; }
+            .header h1 { font-size: 24px; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .control-row { flex-direction: column; align-items: stretch; }
+            .actions { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+            .modal-content { padding: 20px; margin: 20px auto; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <div class="header-top">
                 <div>
                     <h1>🎯 Your Internship Dashboard</h1>
-                    <p>Fresh opportunities updated automatically</p>
+                    <p>Showing jobs from last 24 hours • Applied jobs saved forever</p>
                     <div class="header-status">
                         <span id="last-check">🕐 Last updated: Just now</span> • 
                         <span id="next-refresh">⏱️ Next check in 5:00</span>
                     </div>
                 </div>
                 <div class="header-buttons">
-                    <button class="icon-btn" onclick="runScraper()" title="Fetch Fresh Jobs Now">
-                        🔄 Refresh
+                    <button class="icon-btn" onclick="runScraper()" title="Fetch Fresh Jobs">
+                        🔄
                     </button>
-                    <button class="icon-btn" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+                    <button class="icon-btn" onclick="toggleDarkMode()" title="Dark Mode">
                         🌙
                     </button>
                 </div>
@@ -442,11 +418,15 @@
             <div class="stats">
                 <div class="stat">
                     <span class="stat-value" id="total-jobs">{{ total }}</span>
-                    <span class="stat-label">Fresh Jobs</span>
+                    <span class="stat-label">Total Jobs (24hrs)</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-value" id="applied-count">0</span>
-                    <span class="stat-label">Applied Today</span>
+                    <span class="stat-value" id="last-hour-count">{{ last_hour_count }}</span>
+                    <span class="stat-label">🔥 Last Hour</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value" id="applied-count">{{ applied_count }}</span>
+                    <span class="stat-label">Applied</span>
                 </div>
                 <div class="stat">
                     <span class="stat-value" id="pm-count">0</span>
@@ -454,55 +434,68 @@
                 </div>
                 <div class="stat">
                     <span class="stat-value" id="data-count">0</span>
-                    <span class="stat-label">Data/Analytics</span>
+                    <span class="stat-label">Data</span>
                 </div>
                 <div class="stat">
                     <span class="stat-value" id="design-count">0</span>
-                    <span class="stat-label">UX/UI Design</span>
+                    <span class="stat-label">Design</span>
                 </div>
             </div>
         </div>
         
-        <!-- Controls -->
         <div class="controls">
-            <div class="filters">
-                <button class="filter-btn active" onclick="filterJobs('all')" data-filter="all">
-                    All (<span id="count-all">{{ total }}</span>)
-                </button>
-                <button class="filter-btn" onclick="filterJobs('pm')" data-filter="pm">
-                    📦 PM/Product (<span id="count-pm">0</span>)
-                </button>
-                <button class="filter-btn" onclick="filterJobs('data')" data-filter="data">
-                    📈 Data (<span id="count-data">0</span>)
-                </button>
-                <button class="filter-btn" onclick="filterJobs('design')" data-filter="design">
-                    🎨 Design (<span id="count-design">0</span>)
-                </button>
+            <div class="control-row">
+                <div class="filters">
+                    <button class="filter-btn active" onclick="filterByTime('all')" data-time="all">
+                        All 24hrs (<span id="count-24hr">{{ total }}</span>)
+                    </button>
+                    <button class="filter-btn" onclick="filterByTime('hour')" data-time="hour">
+                        🔥 Last Hour (<span id="count-1hr">{{ last_hour_count }}</span>)
+                    </button>
+                    <button class="filter-btn" onclick="filterByTime('applied')" data-time="applied">
+                        ✅ Applied (<span id="count-applied">{{ applied_count }}</span>)
+                    </button>
+                </div>
             </div>
             
-            <div class="search-box">
-                <input 
-                    type="text" 
-                    id="search-input" 
-                    placeholder="🔍 Search jobs by title, company, or location..."
-                    onkeyup="searchJobs()"
-                >
+            <div class="control-row">
+                <div class="filters">
+                    <button class="filter-btn active" onclick="filterByCategory('all')" data-cat="all">
+                        All Categories
+                    </button>
+                    <button class="filter-btn" onclick="filterByCategory('pm')" data-cat="pm">
+                        📦 PM/Product
+                    </button>
+                    <button class="filter-btn" onclick="filterByCategory('data')" data-cat="data">
+                        📈 Data
+                    </button>
+                    <button class="filter-btn" onclick="filterByCategory('design')" data-cat="design">
+                        🎨 Design
+                    </button>
+                </div>
+                
+                <div class="search-box">
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        placeholder="🔍 Search..."
+                        onkeyup="searchJobs()"
+                    >
+                </div>
+                
+                <select id="sort-select" onchange="sortJobs()" style="padding: 10px; border-radius: 8px; border: 2px solid var(--border); background: var(--card-bg); color: var(--text-primary);">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="company">Company A-Z</option>
+                </select>
             </div>
-            
-            <select id="sort-select" onchange="sortJobs()" style="padding: 10px; border-radius: 8px; border: 2px solid var(--border); background: var(--card-bg); color: var(--text-primary);">
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="company">Company A-Z</option>
-                <option value="title">Title A-Z</option>
-            </select>
         </div>
         
-        <!-- Jobs Grid -->
         <div class="jobs-grid" id="jobs-container">
             {% if total == 0 %}
             <div class="empty-state">
                 <h2>📭 No jobs yet!</h2>
-                <p>Click "🔄 Refresh" button above to fetch fresh internships</p>
+                <p>Click the refresh button to fetch fresh jobs</p>
                 <br>
                 <button class="btn btn-primary" onclick="runScraper()" style="padding: 15px 30px; font-size: 16px;">
                     🔄 Fetch Jobs Now
@@ -510,36 +503,34 @@
             </div>
             {% else %}
                 {% for job in jobs %}
-                <div class="job-card {{ get_category(job[2]) }}" 
+                <div class="job-card {{ get_category(job[2]) }} {% if is_last_hour(job[8]) %}last-hour{% endif %}" 
                      data-title="{{ job[2]|lower }}" 
                      data-company="{{ job[3]|lower }}"
                      data-location="{{ job[4]|lower }}"
                      data-category="{{ get_category(job[2]) }}"
-                     data-date="{{ job[8] }}">
+                     data-date="{{ job[8] }}"
+                     data-applied="{{ job[10] if job|length > 10 else 0 }}"
+                     data-is-hour="{% if is_last_hour(job[8]) %}1{% else %}0{% endif %}">
                     
-                    <div class="job-header">
-                        <div style="flex: 1;">
-                            <div class="job-title">{{ job[2] }}</div>
-                            <div class="job-company">
-                                🏢 {{ job[3] }}
-                            </div>
-                            <div class="job-meta">
-                                <span class="timestamp">
-                                    📍 {{ job[4] }}
-                                </span>
-                                <span class="timestamp">
-                                    ⏰ {{ job[8] }}
-                                </span>
-                                <span class="job-category cat-{{ get_category(job[2]) }}">
-                                    {{ get_category_label(job[2]) }}
-                                </span>
-                            </div>
+                    {% if is_last_hour(job[8]) %}
+                    <div class="new-badge">🔥 NEW</div>
+                    {% endif %}
+                    
+                    <div>
+                        <div class="job-title">{{ job[2] }}</div>
+                        <div class="job-company">🏢 {{ job[3] }}</div>
+                        <div class="job-meta">
+                            <span>📍 {{ job[4] }}</span>
+                            <span>⏰ {{ job[8] }}</span>
+                            <span class="job-category cat-{{ get_category(job[2]) }}">
+                                {{ get_category_label(job[2]) }}
+                            </span>
                         </div>
                     </div>
                     
                     <div class="actions">
                         <button class="btn btn-primary" 
-                                onclick="copyForClaude('{{ job[2] }}', '{{ job[3] }}', '{{ job[4] }}', '{{ job[5] }}')">
+                                onclick="showJobDescription('{{ job[2] }}', '{{ job[3] }}', '{{ job[4] }}', '{{ job[5] }}')">
                             📋 Copy for Claude
                         </button>
                         
@@ -548,10 +539,11 @@
                             🔗 View Job
                         </button>
                         
-                        <button class="btn btn-success apply-btn" 
+                        <button class="btn btn-success" 
                                 onclick="markApplied('{{ job[1] }}', this)"
-                                id="apply-{{ job[1] }}">
-                            ✅ Mark Applied
+                                id="apply-{{ job[1] }}"
+                                {% if job|length > 10 and job[10] == 1 %}disabled{% endif %}>
+                            {% if job|length > 10 and job[10] == 1 %}✅ Applied{% else %}Mark Applied{% endif %}
                         </button>
                     </div>
                 </div>
@@ -559,15 +551,52 @@
             {% endif %}
         </div>
         
-        <!-- Toast Notification -->
+        <!-- Job Description Modal -->
+        <div id="job-modal" class="modal" onclick="closeModalIfBackground(event)">
+            <div class="modal-content" onclick="event.stopPropagation()">
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+                
+                <div class="modal-header">
+                    <div class="modal-title" id="modal-job-title">Job Title</div>
+                    <div class="modal-meta">
+                        <span id="modal-company">Company</span> • 
+                        <span id="modal-location">Location</span>
+                    </div>
+                </div>
+                
+                <h3 style="margin-bottom: 15px; color: var(--text-primary);">📄 Job Description:</h3>
+                <div class="description-text" id="job-description-text">
+                    Loading job description from LinkedIn...
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="copy-description-btn" onclick="copyForClaude()">
+                        📋 Copy Job + Description for Claude
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.open(currentJobUrl, '_blank')">
+                        🔗 Open on LinkedIn
+                    </button>
+                    <button class="btn btn-success" onclick="closeModal()">
+                        ✅ Done
+                    </button>
+                </div>
+            </div>
+        </div>
+        
         <div class="toast" id="toast"></div>
     </div>
     
     <script>
-        // Initialize
+        let currentTimeFilter = 'all';
+        let currentCategoryFilter = 'all';
+        let currentJobUrl = '';
+        let currentJobDescription = '';
+        let currentJobTitle = '';
+        let currentJobCompany = '';
+        let currentJobLocation = '';
+        
         window.onload = function() {
             updateCounts();
-            loadAppliedStatus();
             startRefreshCountdown();
             startAutoRefresh();
         };
@@ -586,29 +615,48 @@
             document.getElementById('pm-count').textContent = pmCount;
             document.getElementById('data-count').textContent = dataCount;
             document.getElementById('design-count').textContent = designCount;
-            document.getElementById('count-pm').textContent = pmCount;
-            document.getElementById('count-data').textContent = dataCount;
-            document.getElementById('count-design').textContent = designCount;
         }
         
-        function filterJobs(category) {
-            const cards = document.querySelectorAll('.job-card');
-            const buttons = document.querySelectorAll('.filter-btn');
+        function filterByTime(timeFilter) {
+            currentTimeFilter = timeFilter;
+            const buttons = document.querySelectorAll('[data-time]');
             
             buttons.forEach(btn => {
-                if (btn.dataset.filter === category) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+                btn.classList.toggle('active', btn.dataset.time === timeFilter);
             });
             
+            applyFilters();
+        }
+        
+        function filterByCategory(catFilter) {
+            currentCategoryFilter = catFilter;
+            const buttons = document.querySelectorAll('[data-cat]');
+            
+            buttons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.cat === catFilter);
+            });
+            
+            applyFilters();
+        }
+        
+        function applyFilters() {
+            const cards = document.querySelectorAll('.job-card');
+            
             cards.forEach(card => {
-                if (category === 'all' || card.dataset.category === category) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
+                let showTime = true;
+                let showCategory = true;
+                
+                if (currentTimeFilter === 'hour' && card.dataset.isHour !== '1') {
+                    showTime = false;
+                } else if (currentTimeFilter === 'applied' && card.dataset.applied !== '1') {
+                    showTime = false;
                 }
+                
+                if (currentCategoryFilter !== 'all' && card.dataset.category !== currentCategoryFilter) {
+                    showCategory = false;
+                }
+                
+                card.style.display = (showTime && showCategory) ? 'block' : 'none';
             });
         }
         
@@ -617,17 +665,8 @@
             const cards = document.querySelectorAll('.job-card');
             
             cards.forEach(card => {
-                const title = card.dataset.title;
-                const company = card.dataset.company;
-                const location = card.dataset.location;
-                
-                if (title.includes(searchTerm) || 
-                    company.includes(searchTerm) || 
-                    location.includes(searchTerm)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
+                const text = card.dataset.title + ' ' + card.dataset.company + ' ' + card.dataset.location;
+                card.style.display = text.includes(searchTerm) ? 'block' : 'none';
             });
         }
         
@@ -638,119 +677,138 @@
             
             cards.sort((a, b) => {
                 switch(sortBy) {
-                    case 'newest':
-                        return b.dataset.date.localeCompare(a.dataset.date);
-                    case 'oldest':
-                        return a.dataset.date.localeCompare(b.dataset.date);
-                    case 'company':
-                        return a.dataset.company.localeCompare(b.dataset.company);
-                    case 'title':
-                        return a.dataset.title.localeCompare(b.dataset.title);
-                    default:
-                        return 0;
+                    case 'newest': return b.dataset.date.localeCompare(a.dataset.date);
+                    case 'oldest': return a.dataset.date.localeCompare(b.dataset.date);
+                    case 'company': return a.dataset.company.localeCompare(b.dataset.company);
+                    default: return 0;
                 }
             });
             
             cards.forEach(card => container.appendChild(card));
         }
         
-        // AUTO-REFRESH SYSTEM
-        let refreshCountdown = 5 * 60; // 5 minutes
+        let refreshCountdown = 5 * 60;
         
         function startRefreshCountdown() {
             setInterval(() => {
                 refreshCountdown--;
+                if (refreshCountdown <= 0) refreshCountdown = 5 * 60;
                 
-                if (refreshCountdown <= 0) {
-                    refreshCountdown = 5 * 60;
-                }
-                
-                const minutes = Math.floor(refreshCountdown / 60);
-                const seconds = refreshCountdown % 60;
+                const min = Math.floor(refreshCountdown / 60);
+                const sec = refreshCountdown % 60;
                 
                 document.getElementById('next-refresh').textContent = 
-                    `⏱️ Next check in ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    `⏱️ Next check in ${min}:${sec.toString().padStart(2, '0')}`;
             }, 1000);
         }
         
         function startAutoRefresh() {
-            // Check for new jobs every 5 minutes
-            setInterval(() => {
-                checkForNewJobs();
-            }, 5 * 60 * 1000);
+            setInterval(checkForNewJobs, 5 * 60 * 1000);
         }
         
         function checkForNewJobs() {
-            console.log('🔄 Checking for new jobs...');
-            
             fetch('/api/jobs')
                 .then(res => res.json())
                 .then(data => {
-                    const currentTotal = parseInt(document.getElementById('total-jobs').textContent);
-                    const newTotal = data.total;
-                    
-                    if (newTotal > currentTotal) {
-                        showToast(`🔥 ${newTotal - currentTotal} new jobs found! Refreshing page...`);
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 2000);
-                    } else {
-                        console.log('✅ No new jobs yet');
-                        updateLastCheckTime();
+                    const current = parseInt(document.getElementById('total-jobs').textContent);
+                    if (data.total > current) {
+                        showToast(`🔥 ${data.total - current} new jobs! Refreshing...`);
+                        setTimeout(() => window.location.reload(), 2000);
                     }
-                })
-                .catch(err => console.error('Error:', err));
+                    updateLastCheckTime();
+                });
         }
         
         function updateLastCheckTime() {
             const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit'
-            });
-            document.getElementById('last-check').textContent = `🕐 Last updated: ${timeStr}`;
+            const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            document.getElementById('last-check').textContent = `🕐 Last updated: ${time}`;
         }
         
         function runScraper() {
-            showToast('🔄 Starting job scraper... New jobs will appear in ~2 minutes!');
+            showToast('🔄 Fetching fresh jobs... Page will refresh in 2 minutes!');
             
-            fetch('/run-scraper', {
-                method: 'POST'
+            fetch('/run-scraper', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    setTimeout(() => window.location.reload(), 120000);
+                });
+        }
+        
+        function showJobDescription(title, company, location, url) {
+            // Store job info
+            currentJobTitle = title;
+            currentJobCompany = company;
+            currentJobLocation = location;
+            currentJobUrl = url;
+            
+            // Show modal
+            document.getElementById('job-modal').style.display = 'block';
+            document.getElementById('modal-job-title').textContent = title;
+            document.getElementById('modal-company').textContent = company;
+            document.getElementById('modal-location').textContent = location;
+            document.getElementById('job-description-text').innerHTML = '<div style="text-align: center; padding: 20px;">🔄 Fetching job description from LinkedIn...</div>';
+            
+            // Fetch description from backend
+            fetch('/get-description', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({url: url})
             })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    // Auto-refresh page after 2 minutes
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 120000);
+                    currentJobDescription = data.description;
+                    document.getElementById('job-description-text').textContent = data.description;
+                } else {
+                    document.getElementById('job-description-text').innerHTML = 
+                        '<div style="color: var(--warning);">⚠️ Could not fetch description automatically.<br><br>Please open LinkedIn and copy the description manually.</div>';
                 }
             })
             .catch(err => {
-                showToast('❌ Error running scraper. Try running "python main.py" in terminal.');
+                document.getElementById('job-description-text').innerHTML = 
+                    '<div style="color: var(--warning);">❌ Error loading description.<br><br>Please copy from LinkedIn manually.</div>';
             });
         }
         
-        function copyForClaude(title, company, location, url) {
-            const text = `Hey Claude! Help me tailor my resume for this job:
+        function copyForClaude() {
+            const template = `Hey Claude! Help me tailor my resume for this job:
 
-Job Title: ${title}
-Company: ${company}
-Location: ${location}
-Job URL: ${url}
+Job Title: ${currentJobTitle}
+Company: ${currentJobCompany}
+Location: ${currentJobLocation}
+Job URL: ${currentJobUrl}
+
+JOB DESCRIPTION:
+${currentJobDescription}
 
 Please:
-1. Tailor my resume to emphasize relevant experience for this ${title} role
-2. Generate a compelling cover letter that shows genuine interest in ${company}
-3. Suggest which of my projects (KAYAK redesign, ServeEase marketplace) to highlight
-4. Add relevant keywords from the job description
+1. Tailor my resume to emphasize relevant experience for this ${currentJobTitle} role
+2. Generate a compelling cover letter showing genuine interest in ${currentJobCompany}
+3. Highlight my KAYAK redesign (99 screens, user research) and ServeEase marketplace (70+ screens) projects
+4. Add relevant keywords from the job description naturally
+5. For UX/Design roles: Emphasize Figma, user research, prototyping
+6. For PM roles: Emphasize stakeholder management, roadmaps, metrics
+7. For Data roles: Emphasize SQL, Python, analytics, data modeling
 
-Here's my master resume:
-[I'll paste it below after fetching the job description]`;
+MY RESUME:
+[Paste your complete resume from resume_master.txt below]
+`;
             
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('✅ Job details copied! Paste in Claude chat to get your tailored resume.');
+            navigator.clipboard.writeText(template).then(() => {
+                showToast('✅ Job description + template copied! Paste in Claude chat with your resume.');
+                closeModal();
             });
+        }
+        
+        function closeModal() {
+            document.getElementById('job-modal').style.display = 'none';
+        }
+        
+        function closeModalIfBackground(event) {
+            if (event.target.id === 'job-modal') {
+                closeModal();
+            }
         }
         
         function markApplied(jobId, button) {
@@ -765,38 +823,16 @@ Here's my master resume:
                 button.disabled = true;
                 button.style.opacity = '0.6';
                 
-                saveAppliedStatus(jobId);
+                button.closest('.job-card').dataset.applied = '1';
                 
                 const count = document.getElementById('applied-count');
-                count.textContent = parseInt(count.textContent) + 1;
+                const countApplied = document.getElementById('count-applied');
+                const newCount = parseInt(count.textContent) + 1;
+                count.textContent = newCount;
+                countApplied.textContent = newCount;
                 
-                showToast('✅ Marked as applied!');
+                showToast('✅ Saved! This job will be kept forever in your database.');
             });
-        }
-        
-        function saveAppliedStatus(jobId) {
-            let applied = JSON.parse(localStorage.getItem('appliedJobs') || '[]');
-            if (!applied.includes(jobId)) {
-                applied.push(jobId);
-                localStorage.setItem('appliedJobs', JSON.stringify(applied));
-            }
-        }
-        
-        function loadAppliedStatus() {
-            const applied = JSON.parse(localStorage.getItem('appliedJobs') || '[]');
-            let count = 0;
-            
-            applied.forEach(jobId => {
-                const button = document.getElementById('apply-' + jobId);
-                if (button) {
-                    button.textContent = '✅ Applied';
-                    button.disabled = true;
-                    button.style.opacity = '0.6';
-                    count++;
-                }
-            });
-            
-            document.getElementById('applied-count').textContent = count;
         }
         
         function toggleDarkMode() {
@@ -808,7 +844,6 @@ Here's my master resume:
             toggles[1].textContent = isDark ? '☀️' : '🌙';
         }
         
-        // Load dark mode preference
         if (localStorage.getItem('darkMode') === 'true') {
             document.body.classList.add('dark-mode');
         }
@@ -817,7 +852,6 @@ Here's my master resume:
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');
-            
             setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000);
