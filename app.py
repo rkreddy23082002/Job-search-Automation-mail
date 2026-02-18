@@ -9,11 +9,8 @@ def get_category(title):
     """Determine job category from title"""
     title_lower = title.lower()
     
-    # PM/Product keywords
     pm_keywords = ['product', 'program', 'project', 'management', 'manager', 'strategy', 'operations']
-    # Data keywords
     data_keywords = ['data', 'analytics', 'analyst', 'intelligence', 'insights', 'science', 'quantitative', 'bi ']
-    # Design keywords
     design_keywords = ['ux', 'ui', 'design', 'designer', 'visual', 'graphic', 'interaction']
     
     if any(kw in title_lower for kw in pm_keywords):
@@ -23,7 +20,7 @@ def get_category(title):
     elif any(kw in title_lower for kw in design_keywords):
         return 'design'
     else:
-        return 'pm'  # Default
+        return 'pm'
 
 def get_category_label(title):
     """Get category display label"""
@@ -35,7 +32,6 @@ def get_category_label(title):
     }
     return labels.get(category, '📦 PM/Product')
 
-# Make functions available in templates
 app.jinja_env.globals.update(get_category=get_category)
 app.jinja_env.globals.update(get_category_label=get_category_label)
 
@@ -103,10 +99,9 @@ Location: {data.get('location')}
 Job URL: {data.get('url')}
 
 Please:
-1. Tailor my resume to emphasize relevant experience for this specific role
-2. Generate a compelling cover letter that shows genuine interest in {data.get('company')}
-3. Suggest which of my projects (KAYAK redesign, ServeEase marketplace) to highlight
-4. Add relevant keywords naturally
+1. Tailor my resume to emphasize relevant experience
+2. Generate a compelling cover letter
+3. Suggest which projects to highlight
 
 I'll paste my resume and job description below.
 """
@@ -119,13 +114,37 @@ def mark_applied():
     data = request.json
     job_id = data.get('job_id')
     
-    # In the future, you can save this to database
-    # For now, it's saved in browser's localStorage
-    
     return jsonify({
         'success': True, 
         'message': f'Marked job {job_id} as applied!',
         'job_id': job_id
+    })
+
+@app.route('/run-scraper', methods=['POST'])
+def run_scraper():
+    """Trigger main.py scraper from dashboard"""
+    import subprocess
+    import threading
+    
+    def run_in_background():
+        try:
+            result = subprocess.run(
+                ['python', 'main.py'], 
+                capture_output=True, 
+                text=True,
+                timeout=180
+            )
+            print("✅ Scraper completed")
+        except Exception as e:
+            print(f"❌ Scraper error: {e}")
+    
+    thread = threading.Thread(target=run_in_background)
+    thread.daemon = True
+    thread.start()
+    
+    return jsonify({
+        'success': True,
+        'message': 'Job scraper started! New jobs will appear in ~2 minutes.'
     })
 
 @app.route('/stats')
@@ -158,6 +177,8 @@ if __name__ == '__main__':
     print("   ✅ Dark mode")
     print("   ✅ Track applied jobs")
     print("   ✅ Copy for Claude (free AI tailoring)")
+    print("   ✅ Auto-refresh every 5 minutes")
+    print("   ✅ Run scraper from dashboard")
     print("\n💡 Make sure 'jobs.db' exists (run main.py first)")
     print("\nPress Ctrl+C to stop\n")
     

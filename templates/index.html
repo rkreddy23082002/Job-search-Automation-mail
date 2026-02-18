@@ -60,6 +60,13 @@
             box-shadow: var(--shadow);
         }
         
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
         .header h1 {
             font-size: 36px;
             font-weight: 700;
@@ -69,6 +76,17 @@
         .header p {
             font-size: 16px;
             opacity: 0.9;
+        }
+        
+        .header-status {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-top: 8px;
+        }
+        
+        .header-buttons {
+            display: flex;
+            gap: 10px;
         }
         
         .stats {
@@ -154,6 +172,8 @@
             border-radius: 8px;
             font-size: 14px;
             transition: border 0.2s;
+            background: var(--card-bg);
+            color: var(--text-primary);
         }
         
         .search-box input:focus {
@@ -161,7 +181,7 @@
             border-color: var(--primary);
         }
         
-        .dark-mode-toggle {
+        .icon-btn {
             padding: 10px 20px;
             background: var(--card-bg);
             border: 2px solid var(--border);
@@ -169,10 +189,14 @@
             cursor: pointer;
             font-size: 20px;
             transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .dark-mode-toggle:hover {
-            transform: scale(1.1);
+        .icon-btn:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
         }
         
         /* Job Cards */
@@ -323,25 +347,35 @@
             margin-bottom: 10px;
         }
         
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 40px;
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-hover);
+            display: none;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+            font-weight: 600;
         }
         
-        .spinner {
-            border: 3px solid var(--border);
-            border-top: 3px solid var(--primary);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+        .toast.show {
+            display: block;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
         
         /* Responsive */
@@ -380,50 +414,29 @@
                 justify-content: center;
             }
         }
-        
-        /* Toast Notifications */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: var(--success);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: var(--shadow-hover);
-            display: none;
-            animation: slideIn 0.3s ease;
-            z-index: 1000;
-        }
-        
-        .toast.show {
-            display: block;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div class="header-top">
                 <div>
                     <h1>🎯 Your Internship Dashboard</h1>
                     <p>Fresh opportunities updated automatically</p>
+                    <div class="header-status">
+                        <span id="last-check">🕐 Last updated: Just now</span> • 
+                        <span id="next-refresh">⏱️ Next check in 5:00</span>
+                    </div>
                 </div>
-                <button class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
-                    🌙
-                </button>
+                <div class="header-buttons">
+                    <button class="icon-btn" onclick="runScraper()" title="Fetch Fresh Jobs Now">
+                        🔄 Refresh
+                    </button>
+                    <button class="icon-btn" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+                        🌙
+                    </button>
+                </div>
             </div>
             
             <div class="stats">
@@ -476,7 +489,7 @@
                 >
             </div>
             
-            <select id="sort-select" onchange="sortJobs()" style="padding: 10px; border-radius: 8px; border: 2px solid var(--border);">
+            <select id="sort-select" onchange="sortJobs()" style="padding: 10px; border-radius: 8px; border: 2px solid var(--border); background: var(--card-bg); color: var(--text-primary);">
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
                 <option value="company">Company A-Z</option>
@@ -489,7 +502,11 @@
             {% if total == 0 %}
             <div class="empty-state">
                 <h2>📭 No jobs yet!</h2>
-                <p>Run <code>python main.py</code> to fetch fresh internships</p>
+                <p>Click "🔄 Refresh" button above to fetch fresh internships</p>
+                <br>
+                <button class="btn btn-primary" onclick="runScraper()" style="padding: 15px 30px; font-size: 16px;">
+                    🔄 Fetch Jobs Now
+                </button>
             </div>
             {% else %}
                 {% for job in jobs %}
@@ -547,10 +564,12 @@
     </div>
     
     <script>
-        // Initialize counts
+        // Initialize
         window.onload = function() {
             updateCounts();
             loadAppliedStatus();
+            startRefreshCountdown();
+            startAutoRefresh();
         };
         
         function updateCounts() {
@@ -576,7 +595,6 @@
             const cards = document.querySelectorAll('.job-card');
             const buttons = document.querySelectorAll('.filter-btn');
             
-            // Update active button
             buttons.forEach(btn => {
                 if (btn.dataset.filter === category) {
                     btn.classList.add('active');
@@ -585,7 +603,6 @@
                 }
             });
             
-            // Filter cards
             cards.forEach(card => {
                 if (category === 'all' || card.dataset.category === category) {
                     card.style.display = 'block';
@@ -637,6 +654,83 @@
             cards.forEach(card => container.appendChild(card));
         }
         
+        // AUTO-REFRESH SYSTEM
+        let refreshCountdown = 5 * 60; // 5 minutes
+        
+        function startRefreshCountdown() {
+            setInterval(() => {
+                refreshCountdown--;
+                
+                if (refreshCountdown <= 0) {
+                    refreshCountdown = 5 * 60;
+                }
+                
+                const minutes = Math.floor(refreshCountdown / 60);
+                const seconds = refreshCountdown % 60;
+                
+                document.getElementById('next-refresh').textContent = 
+                    `⏱️ Next check in ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+        
+        function startAutoRefresh() {
+            // Check for new jobs every 5 minutes
+            setInterval(() => {
+                checkForNewJobs();
+            }, 5 * 60 * 1000);
+        }
+        
+        function checkForNewJobs() {
+            console.log('🔄 Checking for new jobs...');
+            
+            fetch('/api/jobs')
+                .then(res => res.json())
+                .then(data => {
+                    const currentTotal = parseInt(document.getElementById('total-jobs').textContent);
+                    const newTotal = data.total;
+                    
+                    if (newTotal > currentTotal) {
+                        showToast(`🔥 ${newTotal - currentTotal} new jobs found! Refreshing page...`);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        console.log('✅ No new jobs yet');
+                        updateLastCheckTime();
+                    }
+                })
+                .catch(err => console.error('Error:', err));
+        }
+        
+        function updateLastCheckTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit'
+            });
+            document.getElementById('last-check').textContent = `🕐 Last updated: ${timeStr}`;
+        }
+        
+        function runScraper() {
+            showToast('🔄 Starting job scraper... New jobs will appear in ~2 minutes!');
+            
+            fetch('/run-scraper', {
+                method: 'POST'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Auto-refresh page after 2 minutes
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 120000);
+                }
+            })
+            .catch(err => {
+                showToast('❌ Error running scraper. Try running "python main.py" in terminal.');
+            });
+        }
+        
         function copyForClaude(title, company, location, url) {
             const text = `Hey Claude! Help me tailor my resume for this job:
 
@@ -671,10 +765,8 @@ Here's my master resume:
                 button.disabled = true;
                 button.style.opacity = '0.6';
                 
-                // Save to localStorage
                 saveAppliedStatus(jobId);
                 
-                // Update counter
                 const count = document.getElementById('applied-count');
                 count.textContent = parseInt(count.textContent) + 1;
                 
@@ -712,14 +804,13 @@ Here's my master resume:
             const isDark = document.body.classList.contains('dark-mode');
             localStorage.setItem('darkMode', isDark);
             
-            const toggle = document.querySelector('.dark-mode-toggle');
-            toggle.textContent = isDark ? '☀️' : '🌙';
+            const toggles = document.querySelectorAll('.icon-btn');
+            toggles[1].textContent = isDark ? '☀️' : '🌙';
         }
         
         // Load dark mode preference
         if (localStorage.getItem('darkMode') === 'true') {
             document.body.classList.add('dark-mode');
-            document.querySelector('.dark-mode-toggle').textContent = '☀️';
         }
         
         function showToast(message) {
