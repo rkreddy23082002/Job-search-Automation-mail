@@ -1,0 +1,24 @@
+RAMA KRISHNA REDDY GODALA
+godala.r@northeastern.edu | Boston, MA
+LinkedIn: linkedin.com/in/ramakrish
+
+EDUCATION
+Northeastern University, Boston, MA
+Master of Science in Information Systems, GPA: 3.94/4.0
+Expected Graduation: May 2027
+
+EXPERIENCE
+Software Engineer Intern | NEXT GEN | June-Sept 2023
+- Developed C-based applications improving performance by 25%
+- Collaborated in Agile sprints with cross-functional teams
+
+Web Developer Intern | RineX.Ai | Sept-Nov 2022
+- Built full-stack applications using React.js and Node.js
+- Designed RESTful APIs serving 1000+ users
+
+PROJECTS
+KAYAK Travel Platform Redesign - 99-screen UX/UI redesign
+ServeEase Marketplace - 70+ screen home services app
+
+SKILLS
+Python, Java, JavaScript, SQL, React.js, Figma, Tableau
